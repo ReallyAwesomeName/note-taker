@@ -4,7 +4,7 @@ const fs = require("fs");
 
 const uuid = require("./helpers/uuid");
 
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
 
 const app = express();
 
@@ -42,14 +42,17 @@ app.post("/api/notes", (req, res) => {
 
 app.delete("/api/notes/:id", (req, res) => {
   const id = req.params.id;
+  console.log(id);
   fs.readFile("./db/db.json", "utf8", (err, data) => {
     if (err) throw err;
     const notes = JSON.parse(data);
-    notes.splice(id, 1);
-    fs.writeFile("./db/db.json", JSON.stringify(notes), (err) => {
+    //remove the note with the given id
+    const newNotes = notes.filter((note) => note.id !== id);
+    fs.writeFile("./db/db.json", JSON.stringify(newNotes), (err) => {
       if (err) throw err;
     });
   });
+  res.sendFile(path.join(__dirname, "/public/notes.html"));
 });
 
 app.listen(PORT, () => {
